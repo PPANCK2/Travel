@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Luxe Travel Planner</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f7f8fa;color:#1a1a2e;min-height:100vh}
+:root{--teal:#2a7f8f;--teal-light:#e8f4f6;--gold:#c8a04a;--gold-light:#fdf6e3;--gray:#6b7280;--border:#e2e8f0;--white:#fff;--radius:12px}
+.app{max-width:880px;margin:0 auto;padding:2rem 1rem 4rem}
+header{text-align:center;margin-bottom:2.5rem}
+header h1{font-size:1.8rem;font-weight:700;color:var(--teal);letter-spacing:-.5px}
+header p{color:var(--gray);font-size:.9rem;margin-top:.4rem}
+.card{background:var(--white);border-radius:var(--radius);border:1px solid var(--border);padding:1.75rem;margin-bottom:1.25rem}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:600px){.form-grid{grid-template-columns:1fr}}
+label{display:block;font-size:.78rem;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem}
+input,select{width:100%;padding:.65rem .9rem;border:1px solid var(--border);border-radius:8px;font-size:.95rem;color:#1a1a2e;background:var(--white);outline:none;transition:border-color .2s}
+input:focus,select:focus{border-color:var(--teal)}
+.full{grid-column:1/-1}
+.pax-row{display:flex;align-items:center;gap:.75rem}
+.pax-btn{width:34px;height:34px;border:1px solid var(--border);border-radius:6px;background:var(--white);font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--teal);font-weight:700;flex-shrink:0}
+.pax-btn:hover{background:var(--teal-light)}
+#pax-display{font-size:1rem;font-weight:700;min-width:1.5rem;text-align:center}
+.btn-primary{width:100%;padding:.85rem;background:var(--teal);color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:600;cursor:pointer;margin-top:1.25rem;transition:background .2s}
+.btn-primary:hover{background:#236e7c}
+#district-row{display:none}
+.tab-bar{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.25rem}
+.tab{padding:.42rem .95rem;border:1px solid var(--border);border-radius:20px;font-size:.82rem;font-weight:600;cursor:pointer;background:#f9fafb;color:var(--gray);transition:all .15s}
+.tab.active{background:var(--teal);color:#fff;border-color:var(--teal)}
+.tab-content{display:none}.tab-content.active{display:block}
+.logistics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:.85rem}
+.l-card{background:#f9fafb;border:1px solid var(--border);border-radius:10px;padding:1rem}
+.l-icon{font-size:1.25rem;margin-bottom:.4rem}
+.l-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--gray);margin-bottom:.2rem}
+.l-val{font-size:.92rem;font-weight:600;color:#1a1a2e;line-height:1.4}
+.l-sub{font-size:.78rem;color:var(--gray);margin-top:.2rem;line-height:1.4}
+.reco-grid{display:grid;gap:.8rem}
+.reco-item{display:flex;gap:.85rem;align-items:flex-start;padding:.9rem 1rem;background:#fafafa;border:1px solid var(--border);border-radius:10px}
+.reco-num{min-width:26px;height:26px;background:var(--teal);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0;margin-top:2px}
+.reco-name{font-weight:600;font-size:.93rem;margin-bottom:.18rem}
+.reco-note{font-size:.82rem;color:var(--gray);line-height:1.5}
+.timeline-wrap{position:relative;padding-left:1.4rem}
+.timeline-wrap::before{content:'';position:absolute;left:6px;top:4px;bottom:4px;width:2px;background:var(--teal-light)}
+.tl-item{position:relative;margin-bottom:1.1rem;padding-left:.8rem}
+.tl-item::before{content:'';position:absolute;left:-1.05rem;top:5px;width:10px;height:10px;border-radius:50%;background:var(--teal);border:2px solid #fff;outline:2px solid var(--teal)}
+.tl-time{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--teal);margin-bottom:.12rem}
+.tl-title{font-weight:600;font-size:.9rem}
+.tl-desc{font-size:.81rem;color:var(--gray);margin-top:.1rem;line-height:1.5}
+.checklist-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:.5rem}
+.check-item{display:flex;align-items:center;gap:.6rem;padding:.52rem .75rem;background:#f9fafb;border:1px solid var(--border);border-radius:8px;cursor:pointer;user-select:none;transition:background .15s}
+.check-item:hover{background:var(--teal-light)}
+.check-item.done{opacity:.5;text-decoration:line-through}
+.check-box{width:17px;height:17px;border:2px solid var(--border);border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px}
+.check-item.done .check-box{background:var(--teal);border-color:var(--teal);color:#fff}
+.check-label{font-size:.84rem}
+.splitter{background:var(--gold-light);border:1px solid #e8d5a3;border-radius:10px;padding:1.2rem;margin-top:1.2rem}
+.splitter h4{font-size:.8rem;font-weight:700;color:#a07830;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.85rem}
+.splitter-row{display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:.75rem}
+.splitter-row>div{flex:1;min-width:120px}
+.split-result{font-size:1rem;font-weight:700;color:#a07830;padding:.65rem .9rem;background:#fff;border:1px solid #e8d5a3;border-radius:8px;text-align:center;margin-top:.5rem}
+.advisory{background:#fff8e1;border:1px solid #ffe082;border-radius:10px;padding:1rem 1.2rem}
+.advisory p{font-size:.85rem;color:#7a5c00;line-height:1.65;margin-bottom:.5rem}
+.advisory p:last-child{margin-bottom:0}
+.dest-header h2{font-size:1.45rem;font-weight:700;color:var(--teal);margin-bottom:.5rem}
+.badge-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.1rem}
+.badge{display:inline-flex;align-items:center;gap:.35rem;font-size:.78rem;font-weight:600;padding:.3rem .75rem;border-radius:20px}
+.badge-teal{background:var(--teal-light);color:var(--teal)}
+.badge-green{background:#f0fdf4;color:#166534}
+.loading-state{text-align:center;padding:3rem 1rem;color:var(--gray)}
+.spinner{width:34px;height:34px;border:3px solid var(--teal-light);border-top-color:var(--teal);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 1rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+.error-box{background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:.9rem 1rem;color:#dc2626;font-size:.87rem;margin-top:1rem}
+.divider{display:flex;align-items:center;gap:.75rem;margin:1.4rem 0 1rem}
+.divider span{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--teal);white-space:nowrap}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.not-found{background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:1.2rem;color:#0369a1;font-size:.88rem;line-height:1.6}
+#dashboard{display:none}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <h1>✦ Luxe Travel Planner</h1>
+  <p>5-star intelligence for your next journey</p>
+</header>
+
+<div class="card" id="form-card">
+  <div class="form-grid">
+    <div class="full">
+      <label>Primary Destination</label>
+      <input type="text" id="city" placeholder="e.g. Tokyo, Paris, Bali, London" oninput="checkDistrict()" list="city-suggest">
+      <datalist id="city-suggest"></datalist>
+    </div>
+    <div class="full" id="district-row">
+      <label>District / Town / Suburb <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#9ca3af">(optional — for large cities)</span></label>
+      <input type="text" id="district" placeholder="e.g. Shinjuku, Soho, Le Marais">
+    </div>
+    <div>
+      <label>Travel From</label>
+      <input type="date" id="date-from">
+    </div>
+    <div>
+      <label>Travel To</label>
+      <input type="date" id="date-to">
+    </div>
+    <div>
+      <label>Travellers</label>
+      <div class="pax-row">
+        <button class="pax-btn" onclick="changePax(-1)">−</button>
+        <span id="pax-display">2</span>
+        <button class="pax-btn" onclick="changePax(1)">+</button>
+        <span style="font-size:.85rem;color:var(--gray)">people</span>
+      </div>
+    </div>
+    <div>
+      <label>Your Home Timezone</label>
+      <select id="home-tz">
+        <option value="">— Select —</option>
+        <option value="Asia/Singapore">Singapore (SGT, UTC+8)</option>
+        <option value="Asia/Kuala_Lumpur">Kuala Lumpur (MYT, UTC+8)</option>
+        <option value="Asia/Bangkok">Bangkok (ICT, UTC+7)</option>
+        <option value="Asia/Jakarta">Jakarta (WIB, UTC+7)</option>
+        <option value="Asia/Manila">Manila (PHT, UTC+8)</option>
+        <option value="Asia/Hong_Kong">Hong Kong (HKT, UTC+8)</option>
+        <option value="Asia/Shanghai">China (CST, UTC+8)</option>
+        <option value="Asia/Tokyo">Tokyo (JST, UTC+9)</option>
+        <option value="Asia/Seoul">Seoul (KST, UTC+9)</option>
+        <option value="Asia/Kolkata">India (IST, UTC+5:30)</option>
+        <option value="Asia/Dubai">Dubai (GST, UTC+4)</option>
+        <option value="Europe/London">London (GMT/BST)</option>
+        <option value="Europe/Paris">Paris (CET/CEST)</option>
+        <option value="America/New_York">New York (ET)</option>
+        <option value="America/Los_Angeles">Los Angeles (PT)</option>
+        <option value="Australia/Sydney">Sydney (AEST)</option>
+      </select>
+    </div>
+    <div>
+      <label>Home Currency</label>
+      <select id="home-currency">
+        <option value="SGD">SGD – Singapore Dollar</option>
+        <option value="MYR">MYR – Malaysian Ringgit</option>
+        <option value="USD">USD – US Dollar</option>
+        <option value="GBP">GBP – British Pound</option>
+        <option value="EUR">EUR – Euro</option>
+        <option value="AUD">AUD – Australian Dollar</option>
+        <option value="JPY">JPY – Japanese Yen</option>
+        <option value="HKD">HKD – Hong Kong Dollar</option>
+        <option value="CNY">CNY – Chinese Yuan</option>
+        <option value="INR">INR – Indian Rupee</option>
+        <option value="IDR">IDR – Indonesian Rupiah</option>
+        <option value="THB">THB – Thai Baht</option>
+      </select>
+    </div>
+  </div>
+  <button class="btn-primary" onclick="planTrip()">Generate My Itinerary ✦</button>
+  <div id="form-error" class="error-box" style="display:none"></div>
+</div>
+
+<div id="loading" class="card loading-state" style="display:none">
+  <div class="spinner"></div>
+  <p id="loading-msg">Fetching live weather & rates…</p>
+</div>
+
+<div id="dashboard">
+  <div class="card">
+    <div class="dest-header">
+      <h2 id="dash-title"></h2>
+      <div class="badge-row">
+        <span class="badge badge-teal" id="dash-dates"></span>
+        <span class="badge badge-green" id="dash-pax"></span>
+      </div>
+    </div>
+    <div class="tab-bar">
+      <div class="tab active" onclick="switchTab('logistics')">🗺 Logistics</div>
+      <div class="tab" onclick="switchTab('stays')">🏨 Stays</div>
+      <div class="tab" onclick="switchTab('attractions')">🎯 Attractions</div>
+      <div class="tab" onclick="switchTab('dining')">🍽 Dining</div>
+      <div class="tab" onclick="switchTab('timeline')">📅 Day Timeline</div>
+      <div class="tab" onclick="switchTab('packing')">🧳 Packing</div>
+      <div class="tab" onclick="switchTab('commute')">🚇 Commute</div>
+    </div>
+
+    <div id="tab-logistics" class="tab-content active">
+      <div class="logistics-grid" id="logistics-grid"></div>
+      <div class="divider"><span>Group cost splitter</span></div>
+      <div class="splitter">
+        <h4>Split expenses per person</h4>
+        <div class="splitter-row">
+          <div><label style="color:#a07830">Total amount</label><input type="number" id="split-amount" placeholder="0.00" oninput="calcSplit()" style="border-color:#e8d5a3"></div>
+          <div><label style="color:#a07830">Currency</label>
+            <select id="split-currency" onchange="calcSplit()" style="border-color:#e8d5a3">
+              <option value="dest">Destination currency</option>
+              <option value="home">Home currency</option>
+            </select>
+          </div>
+        </div>
+        <div class="split-result" id="split-result">Enter an amount above</div>
+      </div>
+    </div>
+    <div id="tab-stays" class="tab-content"><div class="reco-grid" id="stays-grid"></div></div>
+    <div id="tab-attractions" class="tab-content"><div class="reco-grid" id="attractions-grid"></div></div>
+    <div id="tab-dining" class="tab-content"><div class="reco-grid" id="dining-grid"></div></div>
+    <div id="tab-timeline" class="tab-content"><div class="timeline-wrap" id="timeline-list"></div></div>
+    <div id="tab-packing" class="tab-content"><div class="checklist-grid" id="packing-grid"></div></div>
+    <div id="tab-commute" class="tab-content"><div class="advisory" id="commute-advisory"></div></div>
+  </div>
+  <button class="btn-primary" style="max-width:200px;margin:0 auto;display:block;background:#fff;color:var(--teal);border:1px solid var(--teal)" onclick="resetForm()">← Plan Another Trip</button>
+</div>
+</div>
+
+<script>
+// ── CITY DATABASE ──────────────────────────────────────────────
+const CITIES = {
+  "tokyo": {
+    country:"Japan", lat:35.6762, lon:139.6503, tz:"Asia/Tokyo", utcOffset:9,
+    currency:"JPY", currencyName:"Japanese Yen", currencySymbol:"¥",
+    plug:"Type A/B (2-pin flat)", voltage:"100V / 50-60Hz",
+    isLarge:true,
+    stays:[
+      {name:"The Peninsula Tokyo",note:"Iconic luxury in Marunouchi with stunning imperial palace views, legendary Peninsula service, and one of the finest restaurants in the city."},
+      {name:"Aman Tokyo",note:"Sky-high sanctuary on floors 33–38 of Otemachi Tower. Minimalist Japanese aesthetic, enormous spa, and extraordinary breakfast."},
+      {name:"Park Hyatt Tokyo",note:"Made famous by Lost in Translation. New Shinjuku skyscraper location, impeccable service, legendary New York Bar on the 52nd floor."}
+    ],
+    attractions:[
+      {name:"Senso-ji Temple, Asakusa",note:"Tokyo's oldest temple. Visit at dawn before crowds arrive — the lantern-lit Nakamise shopping street is magical in early morning mist."},
+      {name:"teamLab Borderless / Planets",note:"World-renowned immersive digital art museum. Book months in advance. Borderless is more gallery; Planets is more physical and visceral."},
+      {name:"Shibuya Crossing & Scramble Square",note:"Watch the world's busiest crossing from the observation deck of Scramble Square on the 47th floor — especially electric at night."},
+      {name:"Tsukiji Outer Market",note:"Arrive by 7am for the freshest sushi breakfast of your life. The inner market has moved to Toyosu but the outer stalls remain spectacular."},
+      {name:"Shinjuku Gyoen National Garden",note:"3 distinct garden styles — French formal, English landscape, Japanese traditional. Cherry blossoms in spring are unrivalled."},
+      {name:"Harajuku & Omotesando",note:"Japan's fashion axis. Omotesando Hills for luxury boutiques; Takeshita Street for Harajuku's wild street fashion culture."},
+      {name:"teamLab Borderless",note:"Immersive digital art beyond imagination. Book well in advance — one of the most visited art institutions in the world."}
+    ],
+    dining:[
+      {name:"Sukiyabashi Jiro Honten",note:"The world's most famous sushi counter — 3 Michelin stars, 10 seats, 20-minute omakase. Reservations require connections or a luxury hotel concierge."},
+      {name:"Narisawa",note:"2 Michelin stars. Chef Yoshihiro Narisawa's 'Innovative Satoyama' cuisine blends French technique with Japanese forest foraging philosophy."},
+      {name:"Den",note:"Playful yet precise 2-star kaiseki. Chef Zaiyu Hasegawa's signature 'Dentucky Fried Chicken' has become a Tokyo legend."},
+      {name:"Sushi Saito",note:"Widely considered the best sushi in Tokyo. Nearly impossible to book without a trusted introduction — your hotel concierge is your best chance."},
+      {name:"Ryugin",note:"3 Michelin stars. Seiji Yamamoto's hyper-seasonal Japanese cuisine pushes the boundaries of traditional kaiseki with scientific precision."}
+    ],
+    timeline:[
+      {time:"Morning (7am)",title:"Tsukiji Outer Market",desc:"Arrive early for fresh sushi breakfast at one of the oldest stalls. The tuna sashimi here is extraordinary."},
+      {time:"Late Morning (10am)",title:"Senso-ji & Asakusa",desc:"Explore Tokyo's oldest temple complex. Walk the Nakamise shopping street for traditional crafts and snacks."},
+      {time:"Lunch (12:30pm)",title:"Tempura Kondo or Ramen at Ichiran",desc:"Either a refined tempura kaiseki lunch or the full solo-booth ramen experience Ichiran is famous for."},
+      {time:"Afternoon (2:30pm)",title:"Shibuya & Harajuku",desc:"Walk from Shibuya Crossing to Omotesando — window shop luxury boutiques, visit Meiji Shrine en route."},
+      {time:"Late Afternoon (5pm)",title:"teamLab Planets",desc:"Allow 90 minutes for the immersive digital art experience — most spectacular as daylight fades."},
+      {time:"Evening (7:30pm)",title:"Shinjuku Golden Gai",desc:"Explore the labyrinth of tiny atmospheric bars. Each seats 5-8 people. Order whatever the bartender recommends."},
+      {time:"Night (9:30pm)",title:"New York Bar, Park Hyatt",desc:"End the night 52 floors up with a cocktail and live jazz. The Tokyo skyline at night from here is unforgettable."}
+    ],
+    packing:["JR Pass (buy before arrival)","Suica / Pasmo IC card","Pocket WiFi or eSIM","Cash — Japan is still largely cash-based","Comfortable walking shoes (10km+ days expected)","Light layers — temperature varies by district","Portable umbrella","Small day bag (lockers are everywhere)","Hand towel / handkerchief (not always provided)","Adapter not needed for Type A plug","Modest clothing for temple visits","Power bank","Download Google Maps offline","Translation app (Google Translate with camera)","Luggage forwarding (Takkyubin) app"],
+    commute:"Tokyo's train network is the most precise in the world — trains run to the second. Buy a Suica or Pasmo IC card at any station (¥500 deposit, reloadable) and tap on/off every line including subways, JR, and most buses.\n\nAvoid the subway strictly between 7:30–9:30am and 5:30–8pm on weekdays — carriages reach 200% capacity. Women-only carriages operate during rush hours (look for the pink signage on platform floors).\n\nFor longer distances, the Shinkansen (bullet train) is extraordinary. Book reserved seats. JR Pass holders ride free; otherwise buy tickets at green machines or the JR ticket office.\n\nTaxis are expensive (¥730 flag fall) but safe and metered. Uber operates but is limited. For late-night travel after trains stop (~midnight), taxis are your main option — negotiate nothing, the meter is law.\n\nGoogle Maps works perfectly for Tokyo transit routing, including real-time delays."
+  },
+  "paris": {
+    country:"France", lat:48.8566, lon:2.3522, tz:"Europe/Paris", utcOffset:1,
+    currency:"EUR", currencyName:"Euro", currencySymbol:"€",
+    plug:"Type E/F (2-pin round)", voltage:"230V / 50Hz",
+    isLarge:true,
+    stays:[
+      {name:"Ritz Paris",note:"The ultimate Parisian address. Place Vendôme location, Coco Chanel once lived here, Bar Hemingway is a must-visit. Timeless grandeur."},
+      {name:"Le Meurice",note:"Opposite the Tuileries gardens, Alain Ducasse's 3-star restaurant is inside. Versailles-inspired interiors, impeccable Left Bank location."},
+      {name:"Hôtel de Crillon",note:"18th-century palace on Place de la Concorde. Les Ambassadeurs ballroom is one of the most beautiful rooms in Europe. Rose Bar is legendary."}
+    ],
+    attractions:[
+      {name:"Musée du Louvre",note:"Arrive at opening (9am) or book a timed evening entry. Focus on the Denon wing — Mona Lisa, Winged Victory, Venus de Milo — then get lost in antiquities."},
+      {name:"Eiffel Tower — Summit",note:"Book the summit lift online 2 months ahead. Sunset to dusk is the magic window — watch Paris light up as the tower begins its sparkle at the hour."},
+      {name:"Versailles Day Trip",note:"Take the RER C direct from Paris (45 min). Arrive by 9am to beat the crowds. The Hall of Mirrors and gardens are genuinely breathtaking."},
+      {name:"Musée d'Orsay",note:"The world's greatest Impressionist collection housed in a Beaux-Arts railway station. Monet, Renoir, Van Gogh. Never as crowded as the Louvre."},
+      {name:"Le Marais",note:"Paris's most fashionable quarter. Place des Vosges, Picasso Museum, independent galleries, and the best falafel in Europe on Rue des Rosiers."},
+      {name:"Seine River Cruise",note:"Bateaux Mouches or Bateaux Parisiens at dusk. The monuments lit along the river — Notre-Dame, Musée d'Orsay, Eiffel Tower — are extraordinary from water level."}
+    ],
+    dining:[
+      {name:"Guy Savoy",note:"3 Michelin stars inside the Monnaie de Paris. The artichoke and black truffle soup is one of the most famous dishes in French fine dining history."},
+      {name:"L'Arpège",note:"Alain Passard's 3-star vegetable-forward masterpiece. His garden in Sarthe supplies the kitchen. The all-vegetable tasting menu redefined French haute cuisine."},
+      {name:"Le Jules Verne",note:"2 Michelin stars inside the Eiffel Tower, second floor. Frédéric Anton's cuisine pairs with one of the most dramatic dining rooms on earth."},
+      {name:"Septime",note:"Bistronomie at its finest — modern, seasonal French cooking in a relaxed setting. Booking opens 2 weeks ahead and fills in minutes. A true insider's restaurant."},
+      {name:"Café de Flore",note:"The intellectual soul of Paris. Simone de Beauvoir and Sartre held court here. Come for the French breakfast — café crème, croissant, tartine — not for value."}
+    ],
+    timeline:[
+      {time:"Morning (8am)",title:"Café breakfast in Saint-Germain",desc:"Croissant and café crème at a pavement table. This is non-negotiable in Paris. Le Procope or any corner boulangerie."},
+      {time:"Late Morning (10am)",title:"Musée d'Orsay",desc:"3 hours among the Impressionists. The building itself — a converted Beaux-Arts railway station — is as spectacular as the art."},
+      {time:"Lunch (1pm)",title:"Le Comptoir du Relais",desc:"Classic French brasserie lunch in Saint-Germain. Croque monsieur, steak tartare, a carafe of house Beaujolais."},
+      {time:"Afternoon (3pm)",title:"Le Marais stroll",desc:"Walk through Place des Vosges, browse galleries and concept stores, visit the Picasso Museum. End at Rue des Rosiers for L'As du Fallafel."},
+      {time:"Sunset (6:30pm)",title:"Eiffel Tower summit",desc:"The 7pm slot captures sunset over Paris then the city gradually illuminating. The hourly sparkle show at dusk is magical."},
+      {time:"Dinner (8:30pm)",title:"Septime or Grand Véfour",desc:"Book ahead. Septime for modern seasonal French; Grand Véfour for a 1784 institution inside the Palais-Royal arcades."},
+      {time:"Night (11pm)",title:"Bar Hemingway, Ritz Paris",desc:"The bar that Hemingway 'liberated' in 1944. A perfect dry martini to end a perfect Parisian day."}
+    ],
+    packing:["Navigo Découverte metro card (weekly pass — great value)","Comfortable walking shoes — cobblestones are brutal","Scarf (Parisians always wear one, regardless of season)","Smart casual for restaurants — no shorts for dinner","Light rain jacket","Euros in cash (markets, boulangeries)","Adapter Type E/F","Museum pass (Paris Museum Pass covers 50+ sites)","Download SNCF Connect app for trains","Small crossbody bag — pickpockets on Line 1","Sunscreen (summer days are long and warm)","Power bank","Offline Google Maps","Good moisturiser — the weather is dry in winter"],
+    commute:"The Paris Métro is one of the world's great transit systems — 16 lines, covering virtually every arrondissement. Buy a Navigo Découverte weekly pass (€30, covers all zones Mon–Sun) — far better value than individual tickets.\n\nAvoid Line 1 (Louvre/Champs-Élysées corridor) and Line 4 during rush hours 8–9:30am and 6–8pm. These are the most pickpocket-prone lines too — keep bags in front.\n\nTaxis via G7 or Uber are reliable and reasonably priced. Vélib' (city bike share) is excellent for short trips between arrondissements — download the app.\n\nFor Versailles: RER C from Champ de Mars or Gare d'Austerlitz to Versailles Château–Rive Gauche. 45 minutes, no extra zone pass needed with Navigo.\n\nNever tip taxi drivers beyond rounding up. Tipping culture is minimal — 5% in restaurants is considered generous."
+  },
+  "london": {
+    country:"United Kingdom", lat:51.5074, lon:-.1278, tz:"Europe/London", utcOffset:0,
+    currency:"GBP", currencyName:"British Pound", currencySymbol:"£",
+    plug:"Type G (3-pin rectangular)", voltage:"230V / 50Hz",
+    isLarge:true,
+    stays:[
+      {name:"The Savoy",note:"London's grandest address since 1889, overlooking the Thames. Art Deco American Bar, Gordon Ramsay's Savoy Grill, and the legendary Thames Foyer for afternoon tea."},
+      {name:"Claridge's",note:"Art Deco masterpiece in Mayfair, the 'annex of Buckingham Palace.' The Foyer restaurant, Fumoir bar, and an outstanding spa. Royalty and rock stars both call it home."},
+      {name:"The Connaught",note:"Quiet Mayfair grandeur. Helene Darroze holds 3 Michelin stars here. The Connaught Bar is consistently voted the world's best cocktail bar."}
+    ],
+    attractions:[
+      {name:"British Museum",note:"12 million objects, free entry. The Rosetta Stone, Elgin Marbles, Egyptian mummies. Arrive at 10am — the Great Court before the crowds is spectacular."},
+      {name:"Tate Modern",note:"Free entry. Housed in a former Bankside power station, the Turbine Hall installations alone are worth the trip. The Switch House extension has extraordinary Thames views."},
+      {name:"Tower of London & Tower Bridge",note:"900 years of history, the Crown Jewels, Beefeaters. Book timed entry. Walk across Tower Bridge at sunset for the city's most photogenic view."},
+      {name:"Borough Market",note:"London's oldest food market. Come hungry on a Thursday–Saturday. Neal's Yard Dairy cheese, Monmouth Coffee, Bread Ahead doughnuts. The foodie soul of the city."},
+      {name:"Kew Gardens",note:"UNESCO World Heritage site. 300 acres of botanical garden with Victorian glasshouses. The Treetop Walkway and Japanese pagoda are highlights."},
+      {name:"South Bank Walk",note:"Walk from Westminster Bridge to Tower Bridge along the Thames — Shakespeare's Globe, Tate Modern, Borough Market, The Shard. London's greatest free experience."}
+    ],
+    dining:[
+      {name:"The Ledbury",note:"3 Michelin stars in Notting Hill. Brett Graham's nature-driven cuisine is considered by many the finest cooking in London. Exceptional wine list."},
+      {name:"Sketch (The Lecture Room)",note:"2 Michelin stars in Mayfair. Pierre Gagnaire's wildly creative French cuisine in a room that's as theatrical as the food. The Gallery tearoom is an Instagram icon."},
+      {name:"Brat",note:"Tomos Parry's wood-fire Basque-inspired cooking in Shoreditch. The whole turbot is London's most celebrated dish. Queue early or book months ahead."},
+      {name:"St. John",note:"Fergus Henderson's Smithfield classic invented nose-to-tail eating. The bone marrow and parsley salad changed modern British cooking. Rough-hewn and magnificent."},
+      {name:"Kerridge's Bar & Grill",note:"Tom Kerridge at The Corinthia hotel. Modern British comfort cooking elevated to fine dining — the best Sunday roast in London bar none."}
+    ],
+    timeline:[
+      {time:"Morning (8:30am)",title:"Borough Market breakfast",desc:"Monmouth Coffee and a Bread Ahead doughnut, or a full English at Roast on the floor above the market. The best morning ritual in London."},
+      {time:"Late Morning (10:30am)",title:"Tate Modern",desc:"2 hours in the Turbine Hall and Switch House. The permanent collection is free — save ticketed money for a special exhibition if one coincides."},
+      {time:"Lunch (1pm)",title:"South Bank stroll & lunch",desc:"Walk west along the Thames to Southwark. Lunch at Arabica or El Pastor for Middle Eastern or Mexican, both outstanding in Borough Market area."},
+      {time:"Afternoon (3pm)",title:"Tower of London & Tower Bridge",desc:"Join a Beefeater tour for the Crown Jewels. Cross Tower Bridge on foot at the golden hour for the definitive London photograph."},
+      {time:"Late Afternoon (5:30pm)",title:"Shoreditch exploration",desc:"East London's creative quarter. Brick Lane for street art, The Ace Hotel bar, Columbia Road if it's a Sunday morning market."},
+      {time:"Dinner (7:30pm)",title:"Brat or The Ledbury",desc:"Brat for convivial wood-fire feasting; The Ledbury for the full fine dining experience. Book months ahead for the latter."},
+      {time:"Night (10pm)",title:"Connaught Bar",desc:"Consistently voted the world's best cocktail bar. The Martini trolley at your table is one of London's great theatrical rituals."}
+    ],
+    packing:["Oyster Card or contactless bank card (tap on/off all TfL)","Waterproof jacket — always","Layers — weather changes hourly","Smart casual for restaurants (most don't enforce dress code)","Comfortable walking shoes","Umbrella (compact)","Adapter Type G (essential — unique to UK)","Download Citymapper app for transit","Cash for markets (Borough, Brick Lane)","Power bank","Museum passes — most major museums are free","Warm base layer (even in summer, evenings are cool)","Sunscreen (summer can surprise)"],
+    commute:"London's Underground (the Tube) is iconic — 11 lines, running 5am to midnight (24hr Fri/Sat on some lines). Never buy paper tickets — use a contactless bank card or an Oyster Card and tap in/out. The daily fare cap means you'll never overpay regardless of how many journeys you make.\n\nAvoid the Central and Northern lines between 8–9:30am and 5:30–7pm — genuinely unpleasant during peak hours. The Elizabeth Line (opened 2022) is the newest and most comfortable — excellent for east-west travel.\n\nBlack cabs (hackney carriages) are licensed and safe — hail on the street or use the Gett app. Uber is widely used and reliable. Always use licensed services; never accept rides from touts.\n\nFor Heathrow: the Elizabeth Line is direct, 45 minutes to central London for £12–15 (far cheaper than taxis, £50–80).\n\nTipping: 12.5% service charge is often added automatically to restaurant bills — check before adding more. Taxi drivers: round up or add 10%. Bars: no tipping expected."
+  },
+  "singapore": {
+    country:"Singapore", lat:1.3521, lon:103.8198, tz:"Asia/Singapore", utcOffset:8,
+    currency:"SGD", currencyName:"Singapore Dollar", currencySymbol:"S$",
+    plug:"Type G (3-pin rectangular)", voltage:"230V / 50Hz",
+    isLarge:false,
+    stays:[
+      {name:"Raffles Hotel Singapore",note:"The colonial icon since 1887. Long Bar (birthplace of the Singapore Sling), lush Palm Court, and butler service. Staying here is experiencing Singapore's soul."},
+      {name:"Marina Bay Sands",note:"The city-state's most recognisable landmark. Infinity pool on the 57th floor (SkyPark), celebrity restaurants, casino, and spectacular Marina Bay views from every room."},
+      {name:"Capella Singapore (Sentosa)",note:"Hidden on Sentosa Island in colonial-era buildings. Sprawling pool villas, impeccable spa, and a tranquillity that feels a world away from the city buzz."}
+    ],
+    attractions:[
+      {name:"Gardens by the Bay",note:"The Supertrees are extraordinary at night during the OCBC Garden Rhapsody light show (7:45pm & 8:45pm daily). Cloud Forest dome for tropical highland flora."},
+      {name:"Marina Bay Sands SkyPark",note:"The 57th-floor infinity pool is hotel guests only, but the public observation deck offers the most iconic 360° view of Singapore's skyline."},
+      {name:"Hawker Centres — Lau Pa Sat & Maxwell",note:"Singapore's greatest contribution to world food culture. Lau Pa Sat for satay in the evenings; Maxwell Food Centre for Tian Tian's legendary Hainanese chicken rice."},
+      {name:"Singapore Botanic Gardens",note:"UNESCO World Heritage site. The National Orchid Garden has 60,000 plants. Serene, beautifully maintained, and free entry (Orchid Garden S$5)."},
+      {name:"Chinatown & Little India",note:"Heritage enclaves with extraordinary street food, temples, and architecture. The Sri Veeramakaliamman Temple in Little India is stunning; the Buddha Tooth Relic Temple in Chinatown is equally impressive."},
+      {name:"Sentosa & Universal Studios",note:"Cable car from VivoCity to Sentosa. Universal Studios Singapore for theme park thrills; Palawan Beach and Siloso Beach for surprisingly good swimming."}
+    ],
+    dining:[
+      {name:"Odette",note:"3 Michelin stars, ranked Asia's best restaurant multiple times. Julien Royer's French cuisine with Southeast Asian inflections is extraordinarily beautiful. Book 2 months ahead."},
+      {name:"Les Amis",note:"3 Michelin stars. Singapore's most elegant French fine dining room since 1994. Exceptional wine cellar, white-glove service, and dishes of timeless refinement."},
+      {name:"Burnt Ends",note:"1 Michelin star. Dave Pynt's wood-fired Australian/European BBQ in Dempsey. The wagyu beef sausage and bone marrow toast are essential. Queue or book far ahead."},
+      {name:"Lau Pa Sat Hawker Centre",note:"The most atmospheric hawker centre in Singapore — a Victorian cast-iron pavilion. Satay stalls on Boon Tat Street ignite at 7pm. Order the sambal stingray."},
+      {name:"Cloudstreet",note:"2 Michelin stars. Rishi Naleendra's personal cooking journey — Sri Lankan-Australian sensibility expressed through refined tasting menus in an intimate townhouse."}
+    ],
+    timeline:[
+      {time:"Morning (7:30am)",title:"Botanic Gardens sunrise walk",desc:"The gardens open at 5am. Morning light through the Heritage Trees with almost no crowds is one of Singapore's most peaceful experiences."},
+      {time:"Breakfast (9am)",title:"Tian Tian Hainanese Chicken Rice",desc:"Maxwell Food Centre opens at 10am. Queue at Tian Tian for the chicken rice that Barack Obama and Anthony Bourdain both declared perfect."},
+      {time:"Late Morning (11am)",title:"Chinatown & Buddha Tooth Temple",desc:"Explore the heritage shophouses, the ornate Buddha Tooth Relic Temple, and browse the Chinatown Complex hawker centre for kaya toast."},
+      {time:"Lunch (1pm)",title:"Burnt Ends, Dempsey Hill",desc:"Lunch is slightly easier to book. The wagyu beef sausage on a skewer and any cut off the Murray grill are non-negotiable."},
+      {time:"Afternoon (3pm)",title:"Gardens by the Bay",desc:"Cloud Forest dome first (cooler, humid, 35m indoor waterfall). Then wander the Supertree Grove. Book a SkyWalk for the canopy-level view."},
+      {time:"Sunset (7:30pm)",title:"Marina Bay Sands observation",desc:"The OCBC Garden Rhapsody light show at 7:45pm, watched from near Dragonfly Bridge, is free and spectacular."},
+      {time:"Dinner (8:30pm)",title:"Odette or Lau Pa Sat",desc:"The two extremes of Singapore dining: 3-Michelin-star French at Odette, or S$12 sambal stingray at Lau Pa Sat's outdoor satay street. Both are world-class."}
+    ],
+    packing:["EZ-Link card for MRT/buses (buy at any station)","Light breathable clothing — it's 30°C year-round","Rain jacket or compact umbrella (showers are sudden)","Sunscreen (UV index is high daily)","Comfortable walking shoes","Power bank","Download Grab app for taxis","Download MyTransport.SG for bus timings","Cash for hawker centres (many stalls are cash-only)","Smart casual for restaurants in the evening","Insect repellent for Gardens/Botanic areas","No adapter needed for Type G (same as UK)"],
+    commute:"Singapore's MRT is world-class — clean, air-conditioned, and punctual. Buy an EZ-Link card at any station (S$10 deposit + S$5 value) and tap in/out. It works on all MRT lines, LRT, and public buses.\n\nThe network covers virtually every major attraction. Google Maps and the official MyTransport.SG app both give accurate real-time routing.\n\nGrab is the dominant ride-hailing app — cheaper and more convenient than metered taxis for most journeys. Book via the app; the fare is confirmed before you board. Regular taxis (ComfortDelGro, SMRT) are reliable and metered — add S$3–5 surcharge during peak hours (6–9:30am, 5–8pm) and midnight surcharge after 12am.\n\nNo tipping is expected or necessary in Singapore — it is not part of the culture and can occasionally cause mild awkwardness. Service charge (10%) is included in most restaurant bills.\n\nSingapore is extremely walkable between many attractions in the Marina Bay and Orchard areas — the underground City Link Mall connects multiple MRT stations in air-conditioned comfort."
+  },
+  "bali": {
+    country:"Indonesia", lat:-8.4095, lon:115.1889, tz:"Asia/Makassar", utcOffset:8,
+    currency:"IDR", currencyName:"Indonesian Rupiah", currencySymbol:"Rp",
+    plug:"Type C/F (2-pin round)", voltage:"230V / 50Hz",
+    isLarge:false,
+    stays:[
+      {name:"Four Seasons Resort Bali at Sayan",note:"Arguably the most spectacular resort setting in the world — a lotus-filled pond cantilevered over the Ayung River gorge in Ubud's jungle. Extraordinary."},
+      {name:"COMO Shambhala Estate",note:"The benchmark wellness retreat in Bali. Nestled in the jungle above Ubud with the Ayung River below. Programmes in yoga, nutrition, and Ayurveda are world-leading."},
+      {name:"Amankila",note:"Aman's clifftop masterpiece on the quieter east coast. Three-tier infinity pool cascading toward the Lombok Strait. The most photographed view in Bali."}
+    ],
+    attractions:[
+      {name:"Tanah Lot Temple at Sunset",note:"Bali's most iconic image — a Hindu sea temple on a rocky outcrop at sunset. Arrive 90 minutes before sunset to secure a position on the clifftop."},
+      {name:"Ubud Sacred Monkey Forest",note:"Ancient temple complex inhabited by 1,200 Balinese long-tailed macaques. Genuinely magical at dawn before tour groups arrive."},
+      {name:"Tegallalang Rice Terraces",note:"UNESCO-listed ancient subak irrigation system. Best light is 8–10am. The terraces stepped into the valley are one of Southeast Asia's great vistas."},
+      {name:"Mount Batur Sunrise Trek",note:"2-hour hike departing 4am to reach the active volcano's summit for one of the most dramatic sunrises in Asia. A guide is mandatory and included with operators."},
+      {name:"Seminyak Beach & Ku De Ta",note:"Bali's most stylish beach strip. Ku De Ta beach club for sunset cocktails; Potato Head Beach Club for the iconic pool and sundowner experience."}
+    ],
+    dining:[
+      {name:"Locavore",note:"Consistently Southeast Asia's top fine dining. Eelke Plasmeijer's hyper-local Balinese ingredients transformed through modern European technique. Essential booking."},
+      {name:"Metis Restaurant",note:"Stunning French-Mediterranean in a 1930s-style villa with reflecting pools. One of Bali's most beautiful restaurant settings. The duck confit is legendary."},
+      {name:"Mozaic Restaurant",note:"Chef Chris Salans' 20-year Ubud landmark. Formal garden setting, French technique with Balinese ingredients. The degustation is one of the island's finest experiences."},
+      {name:"Warung Babi Guling Ibu Oka",note:"Anthony Bourdain's favourite Bali meal. Suckling pig (babi guling) is the national dish. Queue from 11am — it sells out. This is essential Balinese culture."},
+      {name:"Ku De Ta",note:"The original Seminyak beach club — now a global brand. Sundowner cocktails with feet in the sand, watching the Indian Ocean sunset. Quintessential Bali."}
+    ],
+    timeline:[
+      {time:"Dawn (4am)",title:"Mount Batur Sunrise Trek",desc:"Your guide picks you up at 4am. 2-hour ascent to the active volcano rim. Breakfast with boiled eggs from volcanic steam at the summit. Unforgettable."},
+      {time:"Late Morning (10am)",title:"Tegallalang Rice Terraces",desc:"Post-trek, the light is still soft. Walk the subak terrace paths, hire a local guide for context, stop at a cliff-edge warung for a Bali coffee."},
+      {time:"Lunch (12:30pm)",title:"Warung Babi Guling Ibu Oka, Ubud",desc:"The suckling pig. Go early — it runs out. The crackling skin, turmeric rice, and lawar vegetable salad is one of Southeast Asia's great meals."},
+      {time:"Afternoon (2:30pm)",title:"Sacred Monkey Forest & Ubud Art Market",desc:"An hour with the macaques in the ancient temple complex, then browse Ubud Art Market for batik, woodcarvings, and silver."},
+      {time:"Late Afternoon (5pm)",title:"Tanah Lot at Sunset",desc:"Drive 45 minutes west. Position yourself on the cliff above the sea temple. The sunset over the Indian Ocean behind the silhouetted temple is iconic."},
+      {time:"Dinner (7:30pm)",title:"Locavore, Ubud",desc:"The most important reservation you'll make in Bali. The 7-course tasting menu showcases the island's produce in ways that will genuinely surprise you."},
+      {time:"Night (10pm)",title:"Jalan Dhyana Pura, Seminyak",desc:"Bali's most spirited bar street. Atlas Beach Club or Mirror Lounge for late-night cocktails with the island's most beautiful crowd."}
+    ],
+    packing:["Download Grab app (works in Bali, cheapest option)","Reef-safe sunscreen (mandatory for coral reef dives)","Light cotton or linen clothing","Sarong (required for temple entry — often available to rent)","Modest cover-up for temple visits","Insect repellent (dengue risk is real)","Water purification tablets or bottle filter","Good walking sandals","Rain jacket (rainy season: Nov–March)","Cash in Rupiah (ATMs widely available)","Basic medical kit including antihistamine","Power bank","Plug adapter Type C/F","Download offline Google Maps — Bali's roads are complex","Travel insurance with medical evacuation cover"],
+    commute:"Bali has no public transit to speak of. Your main options are private drivers, Grab, or renting a scooter.\n\nPrivate drivers are the best value for full-day touring — negotiate IDR 400,000–600,000 (roughly USD 25–40) for an 8-hour day including fuel. Your hotel can arrange a trusted driver. WhatsApp-based negotiation is standard.\n\nGrab (ride-hailing app) works in Kuta, Seminyak, and Ubud. Not permitted at official taxi zones (airports, some hotels) — walk 50m away and book. Far cheaper than taxis.\n\nBlue Bird taxis are the only metered taxis in Bali that are fully reliable. Refuse any other taxi tout's approach — negotiate beforehand if you must use a non-metered cab.\n\nScooter rental is IDR 60,000–80,000/day. Only recommended if you're an experienced rider — Bali traffic is chaotic and road conditions vary. Always wear a helmet.\n\nTraffic in Kuta/Seminyak/Canggu can be genuinely gridlocked from 5–8pm. Allow double the expected time for evening journeys."
+  },
+  "new york": {
+    country:"USA", lat:40.7128, lon:-74.006, tz:"America/New_York", utcOffset:-5,
+    currency:"USD", currencyName:"US Dollar", currencySymbol:"$",
+    plug:"Type A/B (2-3 flat pins)", voltage:"120V / 60Hz",
+    isLarge:true,
+    stays:[
+      {name:"The Plaza Hotel",note:"The grande dame of Fifth Avenue since 1907. Central Park views, Eloise at The Plaza, the legendary Oak Bar. The most iconic address in New York."},
+      {name:"Aman New York",note:"The most dramatic new luxury hotel in a generation — occupying Crown Building on 57th Street. Extraordinary spa, rooftop restaurant with Central Park views. Aman's finest urban property."},
+      {name:"The Mark Hotel",note:"Upper East Side's most stylish address, steps from Central Park and the Met. Jean-Georges Vongerichten's restaurant, Jacques Grange interiors, impeccable service."}
+    ],
+    attractions:[
+      {name:"The Metropolitan Museum of Art",note:"One of the world's great encyclopedic museums. The rooftop bar is open May–October — cocktails overlooking Central Park is one of New York's finest experiences."},
+      {name:"Central Park",note:"843 acres in the heart of Manhattan. Hire a bike, walk the Reservoir, visit Bethesda Terrace and Fountain, have a coffee at Le Pain Quotidien on the East Green."},
+      {name:"Brooklyn Bridge & DUMBO",note:"Walk the bridge from Manhattan to Brooklyn. DUMBO (Down Under the Manhattan Bridge Overpass) has the most photographed view in New York — Manhattan skyline through the bridge arches."},
+      {name:"The High Line",note:"A disused elevated railway transformed into a world-famous linear park. Start at Gansevoort Street, walk north through Chelsea. The architecture and art installations are extraordinary."},
+      {name:"One World Observatory",note:"102 floors, 360° views. Book online. The 'See Forever' theatre experience before the lift is genuinely impressive technology."},
+      {name:"MoMA",note:"The Museum of Modern Art houses Starry Night, Les Demoiselles d'Avignon, Monet's Water Lilies. The building itself is a piece of modernist architecture."}
+    ],
+    dining:[
+      {name:"Eleven Madison Park",note:"3 Michelin stars. Daniel Humm's plant-based tasting menu (since 2021) remains one of the world's most ambitious and beautiful dining experiences."},
+      {name:"Le Bernardin",note:"3 Michelin stars. Eric Ripert's temple to French seafood has held its stars since 1986 — one of the longest-running 3-star restaurants in America. Perfection."},
+      {name:"Per Se",note:"Thomas Keller's New York landmark — 3 Michelin stars overlooking Central Park in the Time Warner Center. The 9-course French tasting menu is a New York institution."},
+      {name:"Carbone",note:"The most coveted reservation in New York. Major Food Group's theatrical take on Italian-American red sauce classics. Rigatoni vodka, veal parmesan. Wear something good."},
+      {name:"Katz's Delicatessen",note:"Since 1888 on the Lower East Side. The pastrami sandwich is a New York cultural monument. Come for lunch — the lunch rush energy is part of the experience."}
+    ],
+    timeline:[
+      {time:"Morning (8am)",title:"Breakfast at Sadelle's or Russ & Daughters",desc:"Sadelle's in SoHo for towering bagel towers and smoked fish; Russ & Daughters Café on Houston for the most authentic Lower East Side Jewish breakfast."},
+      {time:"Late Morning (10am)",title:"The Metropolitan Museum of Art",desc:"3 hours minimum. The Egyptian Wing, European Paintings, and the rooftop (summer) are essential. Buy a 3-day pass — it's valid all week."},
+      {time:"Lunch (1:30pm)",title:"Katz's Delicatessen",desc:"The pastrami sandwich. No discussion. Order at the counter, keep your ticket, tip your carver, find a table. Pure New York."},
+      {time:"Afternoon (3pm)",title:"High Line to Chelsea Galleries",desc:"Walk the High Line south, drop into the Chelsea gallery district — more contemporary art per square block than anywhere outside Basel."},
+      {time:"Late Afternoon (5:30pm)",title:"Brooklyn Bridge walk",desc:"Walk from Manhattan to DUMBO. The bridge itself takes 30 minutes. Position yourself at Washington Street in DUMBO for the iconic photograph."},
+      {time:"Dinner (8pm)",title:"Carbone or Le Bernardin",desc:"Carbone for theatrical Italian-American; Le Bernardin for the finest seafood tasting menu in America. Both require booking weeks ahead."},
+      {time:"Night (10:30pm)",title:"The Bar at the NoMad or Attaboy",desc:"The NoMad Bar for elevated cocktails in a beautiful room; Attaboy on Eldridge Street for the city's finest no-menu cocktail bar where the bartender chooses for you."}
+    ],
+    packing:["MetroCard or OMNY contactless tap (for subway & buses)","Comfortable walking shoes — 20,000 steps/day is normal","Layers — NYC weather is highly variable","Smart casual minimum for dinner reservations","Rain jacket","Power bank","Download Citymapper for NYC transit routing","Cash for tips (tipping is 20% minimum at restaurants)","Museum memberships if staying 3+ days","Sunscreen","Adapter not needed for US residents; Type A/B for others"],
+    commute:"New York's subway runs 24 hours, 7 days a week — the only major system in the world to do so. Use OMNY (tap your contactless bank card or Apple/Google Pay) or a MetroCard. Daily cap is $34 with OMNY, so you'll never overpay.\n\nAvoid the 4/5/6 (Lexington Avenue) and the L train during 8–9:30am and 5:30–7pm. The A/C/E on Eighth Avenue is typically less crowded. Weekend service is subject to constant maintenance changes — check the MTA app.\n\nUber and Lyft are widely used, but surge pricing in Midtown during evening rush is brutal. Yellow cabs are metered and reliable — hail on any avenue (not on the street in Midtown, where it's technically illegal to stop traffic). Tip 20%.\n\nWalking is often the fastest option in Midtown — many blocks are just 80 seconds apart. The city grid makes navigation straightforward.\n\nTipping culture is non-negotiable: 20% at restaurants (pre-tax), $1-2/drink at bars, $5/bag at hotels, 20% for taxi and rideshare."
+  },
+  "sydney": {
+    country:"Australia", lat:-33.8688, lon:151.2093, tz:"Australia/Sydney", utcOffset:10,
+    currency:"AUD", currencyName:"Australian Dollar", currencySymbol:"A$",
+    plug:"Type I (3-pin angled)", voltage:"230V / 50Hz",
+    isLarge:true,
+    stays:[
+      {name:"Park Hyatt Sydney",note:"The only luxury hotel with direct Opera House and Harbour Bridge views from every room. The rooftop pool is one of the world's great hotel experiences."},
+      {name:"The Langham Sydney",note:"Grand Victorian heritage building in The Rocks. Afternoon tea in the Lobby Lounge, Michelin-calibre dining at Silvester's, and one of Sydney's finest spas."},
+      {name:"COMO The Treasury, Perth (or Pier One Sydney)",note:"Pier One Sydney Harbour — built on a heritage wharf over the water under the Harbour Bridge. The most unique location of any Sydney hotel."}
+    ],
+    attractions:[
+      {name:"Sydney Opera House",note:"Tour the backstage and Front of House, but also attend a performance — nothing compares to experiencing Utzon's masterpiece from the inside. Book via sydneyoperahouse.com."},
+      {name:"Bondi to Coogee Coastal Walk",note:"6km clifftop walk passing sea pools, surf beaches, and Aboriginal rock engravings. The most beautiful coastal walk in any major city in the world."},
+      {name:"Sydney Harbour Bridge Climb",note:"BridgeClimb takes you to the summit, 134m above the harbour. Sunrise and sunset climbs are the most spectacular. Book weeks ahead."},
+      {name:"Taronga Zoo",note:"World-class zoo on the harbour with the Sydney skyline as its backdrop. The cable car from the Wharf is iconic. The Great Southern Oceans exhibit is extraordinary."},
+      {name:"The Rocks & Circular Quay",note:"Sydney's historic colonial quarter. The weekend Rocks Market, the Museum of Contemporary Art, and the harbour promenade walk are all essential."}
+    ],
+    dining:[
+      {name:"Quay",note:"Peter Gilmore's harbour-side landmark. The snow egg dessert is one of the most famous dishes in Australian dining history. Extraordinary views of the Opera House."},
+      {name:"Sepia",note:"Martin Benn's Japanese-influenced modern Australian fine dining is widely considered the most technically accomplished cooking in Sydney. Book 2 months ahead."},
+      {name:"Bennelong",note:"Peter Gilmore's restaurant inside the Sydney Opera House — a more accessible version of his Quay cooking. The building alone makes it worth every dollar."},
+      {name:"Saint Peter",note:"Josh Niland's revolutionary fish butchery approach has changed how the world thinks about seafood cookery. The fish charcuterie board is unmissable."},
+      {name:"Icebergs Dining Room",note:"Perched above the famous Bondi Icebergs pool with Pacific Ocean views. Modern Italian-Australian cuisine. One of the world's most beautiful restaurant settings."}
+    ],
+    timeline:[
+      {time:"Morning (7am)",title:"Bondi Beach sunrise & Icebergs pool",desc:"Watch the sunrise over the Pacific from Bondi. The Icebergs ocean pool at 7am with no one in it is a Sydney experience money can't fully buy."},
+      {time:"Late Morning (9:30am)",title:"Bondi to Coogee coastal walk",desc:"Start at the Bondi end, walk south past Tamarama, Bronte, and Clovelly to Coogee — 2 hours of the world's most spectacular urban coastal scenery."},
+      {time:"Lunch (12pm)",title:"Icebergs Dining Room",desc:"Book the window table. Pacific views, excellent Italian-inspired seafood, and an iconic setting. The Calabrian chilli pasta is outstanding."},
+      {time:"Afternoon (2:30pm)",title:"Sydney Opera House tour & The Rocks",desc:"Guided Opera House tour, then walk through The Rocks — the colony's first neighbourhood. The weekend market is excellent."},
+      {time:"Sunset (5:30pm)",title:"Harbour Bridge Climb",desc:"The sunset BridgeClimb — 134m above the harbour as the sun drops over the Blue Mountains to the west and the city lights begin to ignite."},
+      {time:"Dinner (7:30pm)",title:"Quay Restaurant",desc:"Peter Gilmore's harbour-side masterpiece. The most celebrated tasting menu in Australia, with the Opera House lit up across the water."},
+      {time:"Night (10pm)",title:"Opera Bar, Circular Quay",desc:"A nightcap at the Opera Bar — on the harbour's edge, Opera House steps above, Harbour Bridge lit ahead. The most beautiful bar setting in the southern hemisphere."}
+    ],
+    packing:["Opal Card for trains/buses/ferries (buy at station)","Reef-safe sunscreen — UV index is extreme","Swimwear & rash vest","Warm layer for evenings (even in summer, it cools)","Comfortable walking shoes","Fly repellent (bush flies are persistent in summer)","Download TripView app for Sydney transit","Type I adapter (unique to Australia/NZ/China)","Sunglasses — essential, not optional","Light rain jacket","Water bottle — stay hydrated in the heat"],
+    commute:"Sydney's Opal Card (reloadable, from any station or 7-Eleven) covers trains, buses, light rail, and ferries with a daily cap of A$16.80. Tap on/off every journey — forgetting to tap off charges the maximum fare.\n\nThe ferry network is extraordinary — taking the F1 from Circular Quay to Manly is one of the world's great harbour commutes (30 minutes, A$9, spectacular). The F8 to Parramatta River is equally scenic.\n\nFor Bondi: take the 380 bus from Circular Quay or Bondi Junction (train then bus). The Eastern Suburbs Railway runs to Bondi Junction — not Bondi Beach itself.\n\nUber is dominant for rideshare; taxis are metered and reliable. Tip 10% if you wish — it's appreciated but not obligatory.\n\nBe aware: Sydney is geographically enormous. Journeys between suburbs can take 45-60 minutes by public transport. A hired car or Uber is often the most practical option for day trips to the Northern Beaches or the Blue Mountains."
+  },
+  "dubai": {
+    country:"UAE", lat:25.2048, lon:55.2708, tz:"Asia/Dubai", utcOffset:4,
+    currency:"AED", currencyName:"UAE Dirham", currencySymbol:"AED",
+    plug:"Type G (3-pin rectangular)", voltage:"220-240V / 50Hz",
+    isLarge:false,
+    stays:[
+      {name:"Burj Al Arab Jumeirah",note:"The world's only 7-star hotel — an all-suite atrium tower on its own island. The helicopter pad lunch, the underwater Royal Suite, the sheer theatre of it. Iconic."},
+      {name:"Atlantis The Palm",note:"The resort that defined Palm Jumeirah. Aquaventure Waterpark, the Ambassador Lagoon with 65,000 sea creatures, and celebrity dining with Nobu and Bread Street Kitchen."},
+      {name:"One&Only The Palm",note:"The most serene address on The Palm — a private Arabian beach resort with 90 villas, a spa village, and intimate scale that contrasts Dubai's gigantism."}
+    ],
+    attractions:[
+      {name:"Burj Khalifa At The Top",note:"828m — the tallest building in the world. Book the 148th floor 'At The Top SKY' for the full experience. Sunset is the most dramatic — book 6 weeks ahead."},
+      {name:"Dubai Mall & Dubai Fountain",note:"The world's largest shopping mall. The Dubai Fountain show (6pm/8pm daily, every 30 min) from the waterfront promenade is genuinely spectacular. Free to watch."},
+      {name:"Al Fahidi Historical Neighbourhood",note:"Dubai's old town — wind-tower architecture, the Dubai Museum, and the abra water taxi across the creek to the Gold and Spice Souks. The real Dubai before the towers."},
+      {name:"Desert Safari & Dune Bashing",note:"An hour from the city, the red dunes of the Dubai Desert Conservation Reserve. Dune bashing, camel rides, falconry, and a Bedouin camp dinner under the stars."},
+      {name:"Palm Jumeirah Monorail & Atlantis",note:"The Palm Monorail from the mainland to the Atlantis Aquaventure is a worthwhile trip — the views of the development from the elevated rail are fascinating."}
+    ],
+    dining:[
+      {name:"Nobu Dubai",note:"Nobu Matsuhisa's Dubai outpost in Atlantis The Palm is one of the best in the global chain. The black cod miso is transcendent. Spectacular sea views."},
+      {name:"Ossiano",note:"Underwater restaurant at Atlantis with floor-to-ceiling views of the Ambassador Lagoon. Chef Grégoire Berger's tasting menus are among Dubai's finest. Utterly dramatic."},
+      {name:"Zuma Dubai",note:"DIFC outpost of the global Japanese robata brand. The Black Angus rib-eye on the robata grill is extraordinary. Dubai's most consistently excellent fine dining."},
+      {name:"Al Hadheerah Desert Restaurant",note:"Traditional Bedouin dining experience in the desert dunes at Bab Al Shams. Mezze, grills, shisha, falconry, and belly dancing. The most theatrical dining in the UAE."},
+      {name:"Pierchic",note:"Built on its own pier over the Arabian Gulf, overlooking the Burj Al Arab. Exceptional seafood, extraordinary sunset views. One of Dubai's most romantic tables."}
+    ],
+    timeline:[
+      {time:"Morning (8am)",title:"Al Fahidi & Dubai Creek Abra",desc:"Explore the old windtower neighbourhood. Take the AED 1 abra water taxi across the creek to the Gold Souk and Spice Souk — the aromatic soul of old Dubai."},
+      {time:"Late Morning (11am)",title:"Jumeirah Mosque",desc:"The most beautiful mosque in Dubai — non-Muslims welcome for guided tours at 10am. A rare and important cultural window into Emirati life."},
+      {time:"Lunch (1pm)",title:"Social by Heinz Beck, The Palm",desc:"2-star lunch on The Palm. Light Mediterranean cuisine with Palm views. Heinz Beck's touch is exquisite and more accessible at lunch than dinner."},
+      {time:"Afternoon (3pm)",title:"Burj Khalifa At The Top",desc:"Beat the sunset crowds by arriving at 3pm for the full 360° view, then stay for the 6pm golden hour. Pre-book SKY lounge on the 148th floor."},
+      {time:"Sunset (6pm)",title:"Dubai Fountain show",desc:"Watch the 6pm show from the Burj Khalifa lake promenade — free, spectacular, and set to Arabic music. The fountain is 275m long and shoots water 150m high."},
+      {time:"Dinner (8:30pm)",title:"Zuma or Ossiano",desc:"Zuma for Japan-meets-Arabia robata perfection in DIFC; Ossiano for the underwater Atlantis experience. Both require booking well ahead."},
+      {time:"Night (11pm)",title:"CÉ LA VI or WHITE Dubai",desc:"CÉ LA VI at Address Beach Resort for the highest sky pool bar; WHITE Dubai at Meydan Racecourse for the weekly outdoor club experience on Fridays."}
+    ],
+    packing:["Nol Card for Metro (buy at any station)","Modest clothing for souks/mosques (shoulders & knees covered)","Sunscreen SPF 50+ — UV is extreme","Lightweight breathable clothes","Formal smart for restaurants and clubs","Shawl/scarf for women (temple visits)","Download Careem or Uber apps","No alcohol in public — only licensed venues","Stay hydrated — 40°C+ in summer","Type G adapter (UK standard, same as Singapore)","Sunglasses","Light jacket for heavily air-conditioned malls/restaurants"],
+    commute:"Dubai Metro (Red and Green lines) is clean, air-conditioned, and very affordable. Buy a Nol Card at any station (AED 25 includes AED 19 credit). Women-only and Gold Class carriages are designated — respect them.\n\nThe Metro covers the main tourist corridor: Mall of the Emirates, Burj Khalifa/Dubai Mall, DIFC, and Dubai Airport. But many attractions (The Palm, Al Fahidi) aren't on the Metro — use taxis or Careem.\n\nCareem (regional Uber equivalent, owned by Uber) and Uber both operate. Fares are very reasonable — AED 20–40 for most city journeys. Book in-app; surge pricing applies during rain (Dubai traffic collapses in rain) and rush hour (8–9:30am, 5–7pm).\n\nTaxis are metered, clean, and reliable. Starting fare AED 12 daytime. Never negotiate — insist on the meter.\n\nAlcohol is only served in licensed hotel restaurants and bars — not in standalone restaurants or public spaces. Respect the culture: modest dress is required in souks, malls, and public areas. Swimwear is confined to beach and pool areas."
+  },
+  "bangkok": {
+    country:"Thailand", lat:13.7563, lon:100.5018, tz:"Asia/Bangkok", utcOffset:7,
+    currency:"THB", currencyName:"Thai Baht", currencySymbol:"฿",
+    plug:"Type A/B/C (mixed)", voltage:"220V / 50Hz",
+    isLarge:true,
+    stays:[
+      {name:"Mandarin Oriental Bangkok",note:"The legendary 'Oriental' — Asia's most storied hotel since 1876. The Authors' Suite where Somerset Maugham and Graham Greene wrote; afternoon tea in the Authors' Lounge."},
+      {name:"The Peninsula Bangkok",note:"A contemporary masterpiece on the Chao Phraya River. River-view suites, the legendary rooftop bar, and the most impeccable service in Thailand."},
+      {name:"137 Pillars Suites & Residences",note:"Boutique luxury in Sukhumvit — suites only, each with a private balcony pool. The Nimitr rooftop bar has the best city view in Bangkok outside a skyscraper."}
+    ],
+    attractions:[
+      {name:"Grand Palace & Wat Phra Kaew",note:"The spiritual heart of Thailand. The Emerald Buddha temple complex is the most important Buddhist site in the country. Arrive at 8am; dress code strictly enforced."},
+      {name:"Wat Arun (Temple of Dawn)",note:"The iconic spire on the Thonburi side of the Chao Phraya. Most dramatic at dawn (hence the name) and at sunset, lit from across the river."},
+      {name:"Chatuchak Weekend Market",note:"The world's largest weekend market — 15,000 stalls, 200,000 visitors per day. Arrive at 9am, wear comfortable shoes, carry cash. Street food throughout is outstanding."},
+      {name:"Damnoen Saduak Floating Market",note:"A 90-minute drive from Bangkok. The most atmospheric floating market in the region — wooden boats laden with tropical fruit and cooked food. Best before 9am."},
+      {name:"Bangkok's Chinatown (Yaowarat)",note:"The gold shop strip and the street food corridor at night are extraordinary. The seafood restaurants on Yaowarat Road after 7pm are among Bangkok's finest value meals."}
+    ],
+    dining:[
+      {name:"Le Normandie",note:"2 Michelin stars at the Mandarin Oriental. Classic French haute cuisine in Bangkok's most historic dining room. The Normandie soufflé is legendary."},
+      {name:"Gaggan Anand",note:"The most progressive restaurant in Asia — Gaggan's emoji tasting menu pushes Indian cuisine into territory no one anticipated. One of the world's 50 best restaurants."},
+      {name:"Nahm",note:"David Thompson's temple to ancient Thai court cuisine. Recipes centuries old, sourced from royal manuscripts. The most historically authentic fine Thai dining in existence."},
+      {name:"Jay Fai",note:"1 Michelin star, street food stall. The most famous crab omelette on earth, cooked by an 80-year-old woman in ski goggles over a charcoal wok. Queue or book months ahead."},
+      {name:"Sorn",note:"2 Michelin stars. Chef Supaksorn Jongsiri's southern Thai cuisine in a beautiful heritage house. The most celebrated Thai fine dining in Bangkok — an essential reservation."}
+    ],
+    timeline:[
+      {time:"Morning (7am)",title:"Grand Palace & Wat Phra Kaew",desc:"Beat the heat and the crowds. The complex opens at 8:30am. Dress modestly (shoulders and knees covered). Allow 2 hours."},
+      {time:"Late Morning (10am)",title:"Wat Arun by longtail boat",desc:"Take the cross-river ferry (฿5) to Wat Arun. Climb the steep prang for Chao Phraya views, then return by longtail boat down the river — one of Bangkok's great experiences."},
+      {time:"Lunch (12:30pm)",title:"Jay Fai or Chinatown seafood",desc:"Jay Fai for the Michelin-starred crab omelette (if you have a reservation); Chinatown's Yaowarat Road for extraordinary wok-hei seafood at 1/10th the price."},
+      {time:"Afternoon (3pm)",title:"Rest / Spa hour",desc:"Bangkok's afternoon heat (35°C+) is brutal. Use this for a Thai massage (reputable spa: Health Land, Divana) — 2 hours for THB 400–800."},
+      {time:"Evening (5:30pm)",title:"Chatuchak sunset & street food",desc:"(Saturday/Sunday only) Evening light at the market is cooler and magical. Or head to Yaowarat Chinatown for the neon-lit 7pm street food awakening."},
+      {time:"Dinner (7:30pm)",title:"Gaggan Anand or Nahm",desc:"The two poles of Bangkok fine dining: Gaggan for hyper-progressive Indian; Nahm for ancient Thai court cuisine. Both require weeks of advance booking."},
+      {time:"Night (10pm)",title:"Vertigo & Moon Bar, Banyan Tree",desc:"Bangkok from 61 floors up. Open-air rooftop bar with unobstructed 360° city views. The most spectacular city panorama in Southeast Asia."}
+    ],
+    packing:["Rabbit Card for BTS Skytrain (buy at any station)","Loose breathable cotton clothing","Modest clothes for temples (shoulders, knees covered)","Small scarf/sarong (temple visits)","Insect repellent (dengue risk)","Sunscreen SPF50+","Download Grab app — essential for Bangkok","Stomach medicine (traveller's diarrhoea is common)","Cash in Thai Baht (ATMs charge THB 220 foreign fee)","Water purification — never drink tap water","Comfortable sandals","Adapter — multiple types used, bring universal"],
+    commute:"Bangkok traffic is legendarily bad — plan for 1.5–2x journey time during rush hours (7:30–9:30am and 5–8pm). The BTS Skytrain (elevated rail) and MRT Subway are the only reliable ways to move during peak hours.\n\nBuy a Rabbit Card at any BTS station. The MRT uses a separate card system (or coins/tokens). The two systems share few interchange stations — the key ones are Asok/Sukhumvit, Siam, and Silom/Sala Daeng.\n\nGrab is indispensable in Bangkok — GrabCar beats tuk-tuks and metered taxis for both price and comfort in most situations. Always use Grab or a metered taxi; freelance tuk-tuk fares for tourists are always inflated.\n\nFor river travel, the Chao Phraya Express Boat (orange flag) runs every 10–20 minutes and is a superb way to reach the Grand Palace, Wat Arun, and the Oriental pier. A THB 15–30 flat fare.\n\nNever accept a tuk-tuk or taxi driver who 'knows a better route' or wants to take you to a gem shop or tailor — this is Bangkok's most persistent tourist scam."
+  }
+};
+
+// ── TIMEZONES OFFSETS ──────────────────────────────────────────
+const TZ_OFFSETS = {
+  "Asia/Singapore":8,"Asia/Kuala_Lumpur":8,"Asia/Bangkok":7,"Asia/Jakarta":7,
+  "Asia/Manila":8,"Asia/Hong_Kong":8,"Asia/Shanghai":8,"Asia/Tokyo":9,
+  "Asia/Seoul":9,"Asia/Kolkata":5.5,"Asia/Dubai":4,"Europe/London":0,
+  "Europe/Paris":1,"America/New_York":-5,"America/Los_Angeles":-8,"Australia/Sydney":10
+};
+
+const TZ_NAMES = {
+  "Asia/Singapore":"SGT","Asia/Kuala_Lumpur":"MYT","Asia/Bangkok":"ICT",
+  "Asia/Jakarta":"WIB","Asia/Manila":"PHT","Asia/Hong_Kong":"HKT",
+  "Asia/Shanghai":"CST","Asia/Tokyo":"JST","Asia/Seoul":"KST",
+  "Asia/Kolkata":"IST","Asia/Dubai":"GST","Europe/London":"GMT/BST",
+  "Europe/Paris":"CET","America/New_York":"ET","America/Los_Angeles":"PT",
+  "Australia/Sydney":"AEST"
+};
+
+const LARGE_CITIES = ['tokyo','london','new york','paris','sydney','berlin','bangkok','istanbul','los angeles','chicago','dubai','hong kong','mumbai','delhi','beijing','shanghai','rome','barcelona','amsterdam','seoul','kuala lumpur','jakarta','manila','melbourne','osaka'];
+
+let pax=2, tripData=null, exRate=1;
+
+function changePax(d){pax=Math.max(1,Math.min(20,pax+d));document.getElementById('pax-display').textContent=pax}
+
+function checkDistrict(){
+  const v=document.getElementById('city').value.trim().toLowerCase();
+  const show=LARGE_CITIES.some(c=>v.includes(c)||c.includes(v)&&v.length>3);
+  document.getElementById('district-row').style.display=show?'block':'none';
+  // populate suggestions
+  const dl=document.getElementById('city-suggest');
+  dl.innerHTML=Object.values(CITIES).map(c=>`<option value="${c.country==='Singapore'?'Singapore':Object.keys(CITIES).find(k=>CITIES[k]===c)}">`).join('');
+}
+
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.onclick?.toString().includes("'"+name+"'")));
+  document.querySelectorAll('.tab-content').forEach(c=>c.classList.toggle('active',c.id==='tab-'+name));
+}
+
+function resetForm(){
+  document.getElementById('dashboard').style.display='none';
+  document.getElementById('form-card').style.display='block';
+}
+
+function getSeasonalWeather(lat, month, city){
+  const isNorthern = lat > 0;
+  const isTropical = Math.abs(lat) < 23;
+  if(isTropical){
+    const wetMonths = [11,0,1,2,3]; // Nov-Mar for equatorial
+    const isWet = wetMonths.includes(month);
+    const temp = 27+Math.round(Math.random()*4);
+    return {temp:`${temp-2}–${temp+2}°C`, desc: isWet ? "Tropical wet season — expect afternoon thunderstorms, high humidity. Mornings are generally clear." : "Tropical dry season — warm and sunny with lower humidity. Ideal conditions.", packing:"Lightweight breathable clothing, compact umbrella, sunscreen SPF50+."};
+  }
+  const seasons = isNorthern ? [
+    {m:[11,0,1],s:"Winter",t:[-5,8],d:"Cold, possibly snowy. Shorter daylight hours."},
+    {m:[2,3,4],s:"Spring",t:[8,18],d:"Mild and pleasant, occasional rain, cherry blossoms in Japan."},
+    {m:[5,6,7],s:"Summer",t:[18,30],d:"Warm to hot, longer days, peak tourist season."},
+    {m:[8,9,10],s:"Autumn",t:[8,20],d:"Crisp and scenic, beautiful foliage, cooling temperatures."}
+  ] : [
+    {m:[11,0,1],s:"Summer",t:[20,35],d:"Hot and sometimes humid. Beach weather, UV is extreme."},
+    {m:[2,3,4],s:"Autumn",t:[15,25],d:"Pleasantly warm, lower humidity, ideal travel conditions."},
+    {m:[5,6,7],s:"Winter",t:[8,18],d:"Mild and cool. Southern cities can get cold at night."},
+    {m:[8,9,10],s:"Spring",t:[12,22],d:"Warming up, occasional rain, gardens in bloom."}
+  ];
+  const s=seasons.find(x=>x.m.includes(month))||seasons[1];
+  const lo=s.t[0],hi=s.t[1];
+  let packNote="";
+  if(hi<5)packNote="Heavy winter coat, thermal layers, waterproof boots, gloves, scarf.";
+  else if(hi<15)packNote="Warm jacket, layers, comfortable walking shoes, light rain protection.";
+  else if(hi<25)packNote="Light layers, a jacket for evenings, comfortable walking shoes.";
+  else packNote="Light breathable clothing, sunscreen, hat, and sunglasses.";
+  return {temp:`${lo}–${hi}°C`,desc:`${s.s} — ${s.d}`,packing:packNote};
+}
+
+function calcTimeDiff(destOffset, homeOffset){
+  const diff = destOffset - homeOffset;
+  if(diff===0) return "Same timezone as home";
+  const abs=Math.abs(diff);
+  const hrs=Math.floor(abs), mins=Math.round((abs-hrs)*60);
+  const timeStr=hrs+(mins?` hrs ${mins} min`:" hours");
+  return diff>0 ? `${timeStr} ahead of home` : `${timeStr} behind home`;
+}
+
+async function fetchExchangeRate(fromCurrency, toCurrency){
+  try{
+    const r=await fetch(`https://open.er-api.com/v6/latest/${fromCurrency}`);
+    const d=await r.json();
+    if(d.result==='success' && d.rates[toCurrency]) return d.rates[toCurrency];
+  }catch(e){}
+  // Fallback approximate rates vs SGD
+  const fallback={USD:0.74,EUR:0.68,GBP:0.58,JPY:110,THB:27,IDR:11800,AUD:1.13,AED:2.72,HKD:5.78,CNY:5.35,INR:61,SGD:1,MYR:3.5};
+  const sgdTo={SGD:1,USD:1.35,EUR:1.47,GBP:1.72,JPY:0.0091,THB:0.037,IDR:0.000085,AUD:0.88,AED:0.37,HKD:0.17,CNY:0.19,INR:0.016,MYR:0.29};
+  const fromSGD=(sgdTo[fromCurrency]||1);
+  const toSGD=(sgdTo[toCurrency]||1);
+  return parseFloat((toSGD/fromSGD).toFixed(4));
+}
+
+async function planTrip(){
+  const cityRaw=document.getElementById('city').value.trim();
+  const district=document.getElementById('district').value.trim();
+  const from=document.getElementById('date-from').value;
+  const to=document.getElementById('date-to').value;
+  const homeTz=document.getElementById('home-tz').value;
+  const homeCur=document.getElementById('home-currency').value;
+  const errEl=document.getElementById('form-error');
+  errEl.style.display='none';
+
+  if(!cityRaw){errEl.textContent='Please enter a destination city.';errEl.style.display='block';return}
+  if(!from||!to){errEl.textContent='Please select your travel dates.';errEl.style.display='block';return}
+  if(new Date(to)<new Date(from)){errEl.textContent='End date must be after start date.';errEl.style.display='block';return}
+  if(!homeTz){errEl.textContent='Please select your home timezone.';errEl.style.display='block';return}
+
+  // Match city
+  const cityKey=Object.keys(CITIES).find(k=>cityRaw.toLowerCase().includes(k)||k.includes(cityRaw.toLowerCase()));
+  const cityData=cityKey?CITIES[cityKey]:null;
+
+  const nights=Math.round((new Date(to)-new Date(from))/(1000*60*60*24));
+  const dest=district?`${district}, ${cityRaw}`:cityRaw;
+
+  document.getElementById('form-card').style.display='none';
+  document.getElementById('loading').style.display='block';
+  document.getElementById('loading-msg').textContent='Fetching live weather & exchange rates…';
+
+  let weather={temp:'Contact local meteorology service',desc:'Live data unavailable',packing:'Pack for all conditions.'};
+  let rate=1;
+
+  if(cityData){
+    const fromDate=new Date(from);
+    const month=fromDate.getMonth();
+    weather=getSeasonalWeather(cityData.lat, month, cityKey);
+    document.getElementById('loading-msg').textContent='Fetching live exchange rates…';
+    rate=await fetchExchangeRate(homeCur, cityData.currency);
+    exRate=rate;
+  } else {
+    // Still fetch a rate for unrecognised city using best guess
+    document.getElementById('loading-msg').textContent='Almost there…';
+    await new Promise(r=>setTimeout(r,600));
+  }
+
+  document.getElementById('loading').style.display='none';
+
+  const homeOffset=TZ_OFFSETS[homeTz]||8;
+  const destOffset=cityData?cityData.utcOffset:homeOffset;
+  const timeDiff=calcTimeDiff(destOffset,homeOffset);
+
+  tripData={
+    dest, from, to, pax, homeCur,
+    cityData, weather, exRate:rate,
+    destCurrency:cityData?.currency||'—',
+    destCurrencyName:cityData?.currencyName||'Local currency',
+    destCurrencySymbol:cityData?.currencySymbol||'',
+    destTimezone:cityData?.tz||'—',
+    timeDiff,
+    plug:cityData?.plugType||'Check with your hotel',
+    voltage:cityData?.voltage||'—'
+  };
+
+  renderDashboard(tripData, cityData, nights);
+}
+
+function renderDashboard(d, city, nights){
+  const fmt=s=>new Date(s+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+  document.getElementById('dash-title').textContent='✦ '+d.dest;
+  document.getElementById('dash-dates').textContent=`${fmt(d.from)} → ${fmt(d.to)}  (${nights} night${nights!==1?'s':''})`;
+  document.getElementById('dash-pax').textContent=`${d.pax} traveller${d.pax>1?'s':''}`;
+
+  // LOGISTICS
+  const rateDisplay=d.exRate>100
+    ? `1 ${d.homeCur} ≈ ${Math.round(d.exRate).toLocaleString()} ${d.destCurrency}`
+    : `1 ${d.homeCur} ≈ ${parseFloat(d.exRate.toFixed(2)).toLocaleString()} ${d.destCurrency}`;
+  document.getElementById('logistics-grid').innerHTML=`
+    <div class="l-card"><div class="l-icon">🌤</div><div class="l-label">Weather (${new Date(d.from+'T12:00:00').toLocaleString('en',{month:'short'})})</div><div class="l-val">${d.weather.temp}</div><div class="l-sub">${d.weather.desc}</div></div>
+    <div class="l-card"><div class="l-icon">🎒</div><div class="l-label">Packing tip</div><div class="l-val" style="font-size:.82rem;font-weight:400">${d.weather.packing}</div></div>
+    <div class="l-card"><div class="l-icon">🔌</div><div class="l-label">Plug / Voltage</div><div class="l-val">${d.plug}</div><div class="l-sub">${d.voltage}</div></div>
+    <div class="l-card"><div class="l-icon">🕐</div><div class="l-label">Time Difference</div><div class="l-val">${d.timeDiff}</div><div class="l-sub">vs. ${TZ_NAMES[document.getElementById('home-tz').value]||'your timezone'}</div></div>
+    <div class="l-card"><div class="l-icon">💱</div><div class="l-label">Exchange Rate</div><div class="l-val">${rateDisplay}</div><div class="l-sub">${d.destCurrencyName} · Live rate via open.er-api.com</div></div>`;
+
+  if(city){
+    // Slice attractions based on trip duration
+    const attrCount=nights<=2?3:nights<=4?5:city.attractions.length;
+    const mkGrid=(items,el)=>{el.innerHTML=items.map((it,i)=>`<div class="reco-item"><div class="reco-num">${i+1}</div><div><div class="reco-name">${it.name}</div><div class="reco-note">${it.note}</div></div></div>`).join('')};
+    mkGrid(city.stays,document.getElementById('stays-grid'));
+    mkGrid(city.attractions.slice(0,attrCount),document.getElementById('attractions-grid'));
+    mkGrid(city.dining,document.getElementById('dining-grid'));
+    document.getElementById('timeline-list').innerHTML=city.timeline.map(t=>`<div class="tl-item"><div class="tl-time">${t.time}</div><div class="tl-title">${t.title}</div><div class="tl-desc">${t.desc}</div></div>`).join('');
+    document.getElementById('packing-grid').innerHTML=city.packing.map((item,i)=>`<div class="check-item" id="ci${i}" onclick="toggleCheck(${i})"><div class="check-box" id="cb${i}"></div><span class="check-label">${item}</span></div>`).join('');
+    document.getElementById('commute-advisory').innerHTML=city.commute.split('\n').filter(Boolean).map(p=>`<p>${p}</p>`).join('');
+  } else {
+    const msg='<div class="not-found">Detailed curated data for this destination is not yet in our database. We currently cover: <strong>Tokyo, Paris, London, Singapore, Bali, New York, Sydney, Dubai, Bangkok</strong>. The logistics panel above shows live exchange rate and timezone data. Try one of the cities listed for the full 5-star experience.</div>';
+    ['stays-grid','attractions-grid','dining-grid'].forEach(id=>document.getElementById(id).innerHTML=msg);
+    document.getElementById('timeline-list').innerHTML=msg;
+    document.getElementById('packing-grid').innerHTML=msg;
+    document.getElementById('commute-advisory').innerHTML=msg.replace('class="not-found"','class="advisory"');
+  }
+
+  document.getElementById('dashboard').style.display='block';
+  switchTab('logistics');
+}
+
+function toggleCheck(i){
+  const el=document.getElementById('ci'+i),cb=document.getElementById('cb'+i);
+  el.classList.toggle('done');
+  cb.textContent=el.classList.contains('done')?'✓':'';
+}
+
+function calcSplit(){
+  if(!tripData)return;
+  const amt=parseFloat(document.getElementById('split-amount').value)||0;
+  const cur=document.getElementById('split-currency').value;
+  const el=document.getElementById('split-result');
+  if(!amt){el.textContent='Enter an amount above';return}
+  let destAmt,homeAmt;
+  if(cur==='dest'){destAmt=amt;homeAmt=amt/exRate}
+  else{homeAmt=amt;destAmt=amt*exRate}
+  const perDest=(destAmt/pax).toFixed(exRate>100?0:2);
+  const perHome=(homeAmt/pax).toFixed(2);
+  el.innerHTML=`Per person: <strong>${tripData.destCurrencySymbol}${parseFloat(perDest).toLocaleString()}</strong> <span style="color:#c8a04a;font-size:.85rem">(${tripData.homeCur} ${parseFloat(perHome).toLocaleString()})</span>`;
+}
+</script>
+</body>
+</html>
